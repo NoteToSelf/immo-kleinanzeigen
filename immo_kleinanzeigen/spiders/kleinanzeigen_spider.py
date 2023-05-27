@@ -15,7 +15,9 @@ class KleinanzeigenSpider(scrapy.Spider):
             for detail in details
         }
         print(detail_map)
-        yield RealEstateItem(caption=response.css('h1::text').get().strip(),
-                             price=response.css('h2[class*="boxedarticle--price"]::text').get().strip(),
-                             area_living=detail_map['Wohnfläche'],
-                             area_plot=detail_map['Grundstücksfläche'])
+        yield RealEstateItem(
+            id=response.css('#viewad-ad-id-box li:nth-child(2)::text').get().strip(),
+            caption=response.css('h1::text').get().strip(),
+            price=response.css('h2[class*="boxedarticle--price"]::text').get().strip(),
+            area_living=detail_map['Wohnfläche'],
+            area_plot=detail_map['Grundstücksfläche'])

@@ -4,11 +4,10 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 from dataclasses import dataclass
 
-import scrapy
-
 
 @dataclass
 class RealEstateItem:
+    id: str
     caption: str
     price: float
     area_living: float
