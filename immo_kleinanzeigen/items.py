@@ -27,3 +27,4 @@ class RealEstateItem:
     views: int
     offerer: str
     offerer_phone_number: str
+    url: str
