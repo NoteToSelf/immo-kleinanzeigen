@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = "immo_kleinanzeigen.spiders"
 #USER_AGENT = "immo_kleinanzeigen (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
