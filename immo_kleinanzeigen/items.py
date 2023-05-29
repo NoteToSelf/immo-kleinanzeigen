@@ -13,6 +13,9 @@ class RealEstateItem:
     price: float
     street: str
     location: str
+    zip_code: str  # to support 0-leading zip code
+    state: str
+    city: str
     area_living: float
     area_plot: float
     total_rooms: int

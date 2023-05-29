@@ -1,6 +1,9 @@
 import scrapy
 
 from immo_kleinanzeigen.items import RealEstateItem
+import re
+
+location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
 
 
 def strip_if_exist(response, selector):
@@ -19,12 +22,17 @@ def parse_details_page(response):
         for detail in details
     }
     # print(detail_map)
+    location = strip_if_exist(response, '#viewad-locality::text')
+    location_match = re.search(location_pattern, location)
     yield RealEstateItem(
         id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
         price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
         street=strip_if_exist(response, '#street-address::text'),
-        location=strip_if_exist(response, '#viewad-locality::text'),
+        location=location,
+        zip_code=location_match.group("zipcode") if location_match else "",
+        state=location_match.group("state") if location_match else "",
+        city=location_match.group("city") if location_match else "",
         area_living=detail_map.get('Wohnfläche'),
         area_plot=detail_map.get('Grundstücksfläche'),
         total_rooms=detail_map.get('Zimmer'),
