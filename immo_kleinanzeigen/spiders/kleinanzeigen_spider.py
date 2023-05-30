@@ -25,7 +25,7 @@ def parse_details_page(response):
     location = strip_if_exist(response, '#viewad-locality::text')
     location_match = re.search(location_pattern, location)
     yield RealEstateItem(
-        id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
+        _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
         price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
         street=strip_if_exist(response, '#street-address::text'),
@@ -57,7 +57,8 @@ class KleinanzeigenSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/haus/k0c208l928'
+            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/haus/k0c208l928',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/c208l928'
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)

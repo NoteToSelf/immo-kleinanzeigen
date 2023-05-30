@@ -5,9 +5,48 @@
 
 
 # useful for handling different item types with a single interface
+import logging
+
 from itemadapter import ItemAdapter
+import pymongo
+
+from scrapy.utils.project import get_project_settings
+from scrapy.exceptions import DropItem
 
 
-class ImmoKleinanzeigenPipeline:
+class MongoDBPipeline(object):
+    def __init__(self):
+        settings = get_project_settings()
+        connection = pymongo.MongoClient(
+            settings['MONGODB_SERVER'],
+            settings['MONGODB_PORT']
+        )
+        db = connection[settings['MONGODB_DB']]
+        self.collection = db[settings['MONGODB_COLLECTION']]
+
     def process_item(self, item, spider):
+        self.collection.insert_one(ItemAdapter(item).asdict())
+        logging.info("Real estate entered")
         return item
+
+
+class DuplicatesPipeline:
+    def __init__(self):
+        settings = get_project_settings()
+        connection = pymongo.MongoClient(
+            settings['MONGODB_SERVER'],
+            settings['MONGODB_PORT']
+        )
+        db = connection[settings['MONGODB_DB']]
+        self.collection = db[settings['MONGODB_COLLECTION']]
+        self.ids_seen = set()
+        for item in self.collection.find():
+            self.ids_seen.add(item.get('_id'))
+
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+        if adapter['_id'] in self.ids_seen:
+            raise DropItem("Duplicate item found: %r" % item)
+        else:
+            self.ids_seen.add(adapter['_id'])
+            return item

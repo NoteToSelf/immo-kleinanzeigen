@@ -8,7 +8,7 @@ from datetime import date
 
 @dataclass
 class RealEstateItem:
-    id: str
+    _id: str
     caption: str
     price: float
     street: str
