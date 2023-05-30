@@ -57,16 +57,21 @@ class KleinanzeigenSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/haus/k0c208l928'
+            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/c208l928'
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
+        cities = response.xpath('//h2[text()="Ort"]/../..').css('a[class="text-link-subdued"]::attr(href)').getall()
+        yield from response.follow_all(cities, self.parse_city_page)
+
+    def parse_city_page(self, response):
         article_links = response.css('.ellipsis').css('a::attr(href)').getall()
+
         yield from response.follow_all(article_links, parse_details_page)
 
         next_link = response.css('.pagination-next').css('a::attr(href)').get()
         if next_link is not None:
             print('Next Link: ' + next_link)
-            yield response.follow(url=next_link, callback=self.parse)
+            yield response.follow(url=next_link, callback=self.parse_city_page)
