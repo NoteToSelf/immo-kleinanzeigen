@@ -57,7 +57,22 @@ class KleinanzeigenSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/c208l928'
+            'https://www.kleinanzeigen.de/s-haus-kaufen/baden-wuerttemberg/anzeige:angebote/c208l7970',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/bayern/anzeige:angebote/c208l5510',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/berlin/anzeige:angebote/c208l3331',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/brandenburg/anzeige:angebote/c208l7711',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/bremen/anzeige:angebote/c208l1',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/hamburg/anzeige:angebote/c208l9409',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/hessen/anzeige:angebote/c208l4279',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/mecklenburg-vorpommern/anzeige:angebote/c208l61',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/niedersachsen/anzeige:angebote/c208l2428',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/nordrhein-westfalen/anzeige:angebote/c208l928',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/rheinland-pfalz/anzeige:angebote/c208l4938',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/saarland/anzeige:angebote/c208l285',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/sachsen/anzeige:angebote/c208l3799',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/sachsen-anhalt/anzeige:angebote/c208l2165',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/schleswig-holstein/anzeige:angebote/c208l408',
+            'https://www.kleinanzeigen.de/s-haus-kaufen/thueringen/anzeige:angebote/c208l3548'
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
