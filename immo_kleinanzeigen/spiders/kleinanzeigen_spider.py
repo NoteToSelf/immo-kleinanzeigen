@@ -16,6 +16,9 @@ def strip_if_exist_else(response, selector, selector2):
 
 
 def parse_details_page(response):
+    if response.url.endswith('DELETED_AD'):
+        print("deleted AD")
+        return
     details = response.css('li[class*="addetailslist--detail"]')
     detail_map = {
         detail.xpath('.//text()').get().strip(): detail.css('span::text').get().strip()
