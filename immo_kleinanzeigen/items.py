@@ -10,6 +10,7 @@ from datetime import date, datetime
 class RealEstateItem:
     _id: str
     caption: str
+    benefits: str
     price: float
     street: str
     location: str
@@ -26,6 +27,7 @@ class RealEstateItem:
     floors: int
     year_build: int
     commission: str
+    description: str
     date_inserted: date
     views: int
     offerer: str
