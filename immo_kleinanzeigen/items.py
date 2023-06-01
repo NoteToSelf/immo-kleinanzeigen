@@ -3,12 +3,12 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 
 
 @dataclass
 class RealEstateItem:
-    id: str
+    _id: str
     caption: str
     price: float
     street: str
@@ -31,3 +31,4 @@ class RealEstateItem:
     offerer: str
     offerer_phone_number: str
     url: str
+    created_datetime: datetime
