@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'immo_kleinanzeigen.pipelines.DuplicatesPipeline': 100,
+    'immo_kleinanzeigen.pipelines.HashDuplicatesPipeline': 100,
     'immo_kleinanzeigen.pipelines.MongoDBPipeline': 300
 }
 
@@ -92,6 +92,7 @@ ITEM_PIPELINES = {
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+DUPEFILTER_DEBUG = True
 
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017

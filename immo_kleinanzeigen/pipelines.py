@@ -23,14 +23,19 @@ class MongoDBPipeline(object):
         )
         db = connection[settings['MONGODB_DB']]
         self.collection = db[settings['MONGODB_COLLECTION']]
+        self.collection.create_index([('id', pymongo.ASCENDING), ('hash', pymongo.ASCENDING)], unique=True)
 
     def process_item(self, item, spider):
-        self.collection.insert_one(ItemAdapter(item).asdict())
-        logging.info("Real estate entered")
-        return item
+        # found_existing = self.collection.count_documents({'id': item.get_id(), 'hash': item.get_hash()})
+        # if found_existing > 0:
+        #     raise DropItem(f"Duplicate item '{item.get_id()}' found with hash '{item.get_hash()}'")
+        # else:
+            self.collection.insert_one(ItemAdapter(item).asdict())
+            logging.info(f"Real estate entered (id: '{item.get_id()}', hash: '{item.get_hash()}')")
+            return item
 
 
-class DuplicatesPipeline:
+class HashDuplicatesPipeline:
     def __init__(self):
         settings = get_project_settings()
         connection = pymongo.MongoClient(
@@ -39,14 +44,15 @@ class DuplicatesPipeline:
         )
         db = connection[settings['MONGODB_DB']]
         self.collection = db[settings['MONGODB_COLLECTION']]
-        self.ids_seen = set()
+        self.hash_seen = set()
+
         for item in self.collection.find():
-            self.ids_seen.add(item.get('_id'))
+            self.hash_seen.add(item['hash'])
 
     def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
-        if adapter['_id'] in self.ids_seen:
-            raise DropItem("Duplicate item found: %r" % item)
+        item.set_hash(hash(item))
+        if item.get_hash() in self.hash_seen:
+            raise DropItem(f"Duplicate item '{item.get_id()}' found with hash '{item.get_hash()}'")
         else:
-            self.ids_seen.add(adapter['_id'])
+            self.hash_seen.add(item.get_hash())
             return item
