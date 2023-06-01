@@ -27,7 +27,7 @@ def parse_details_page(response):
     location = strip_if_exist(response, '#viewad-locality::text')
     location_match = re.search(location_pattern, location)
     yield RealEstateItem(
-        id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
+        _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
         price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
         street=strip_if_exist(response, '#street-address::text'),
@@ -51,17 +51,12 @@ def parse_details_page(response):
                                     '#viewad-contact .text-force-linebreak::text'),
         offerer_phone_number=strip_if_exist(response, '#viewad-contact-phone a::text'),
         url=response.url,
-        created_datetime=datetime.now(),
-        hash=0
+        created_datetime=datetime.now()
     )
 
 
 class KleinanzeigenSpider(scrapy.Spider):
     name = "kleinanzeigen"
-
-    custom_settings = {
-        'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
-    }
 
     def start_requests(self):
         urls = [
