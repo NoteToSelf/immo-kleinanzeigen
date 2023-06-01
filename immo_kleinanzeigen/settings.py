@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'immo_kleinanzeigen.pipelines.HashDuplicatesPipeline': 100,
+    'immo_kleinanzeigen.pipelines.DuplicatesPipeline': 100,
     'immo_kleinanzeigen.pipelines.MongoDBPipeline': 300
 }
 

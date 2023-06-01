@@ -31,7 +31,7 @@ class MongoDBPipeline(object):
         return item
 
 
-class HashDuplicatesPipeline:
+class DuplicatesPipeline:
     def __init__(self):
         settings = get_project_settings()
         connection = pymongo.MongoClient(
