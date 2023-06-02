@@ -25,12 +25,26 @@ def strip_if_exists_and_split(response, selector, split_char):
     return strip_if_exist(response, selector).split(sep=split_char)[0]
 
 
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
+
 def extract_price(price_string):
     # price_string e.g. '555.000€ VB'
-    return price_string.replace('.', '').replace(',', '.').split('€')[0].strip()
+    price = price_string.replace('.', '').replace(',', '.').split('€')[0].strip()
+    if isfloat(price):
+        return price
+    else:
+        return None
 
 
 def extract_area(area_string):
+    if area_string is None:
+        return None
     # area_string e.g. "454 m²"
     return area_string.replace('.', '').replace(',', '.').split('m²')[0].strip()
 
@@ -51,7 +65,7 @@ def parse_details_page(response):
         _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
         benefits=','.join(check_tags),
-        price=float(extract_price(strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'))),
+        price=extract_price(strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text')),
         negotiable="VB" in response.css('h2[class*="boxedarticle--price"]::text').get(),
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
