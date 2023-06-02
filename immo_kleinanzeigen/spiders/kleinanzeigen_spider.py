@@ -7,6 +7,7 @@ from datetime import datetime
 import re
 import html2text
 import requests
+import logging
 
 location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
 views_api_endpoint = "https://www.kleinanzeigen.de/s-vac-inc-get.json?adId="
@@ -31,6 +32,9 @@ def strip_if_exist_else(response, selector, selector2):
 
 
 def parse_details_page(response):
+    if response.url.endswith('DELETED_AD'):
+        logging.debug("deleted AD")
+        return
     details = response.css('li[class*="addetailslist--detail"]')
     detail_map = {
         detail.xpath('.//text()').get().strip(): detail.css('span::text').get().strip()
