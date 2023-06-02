@@ -1,9 +1,15 @@
+import datetime
+
 import scrapy
 
 from immo_kleinanzeigen.items import RealEstateItem
+from datetime import datetime
 import re
+import html2text
 
 location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
+converter = html2text.HTML2Text()
+converter.ignore_links = True
 
 
 def strip_if_exist(response, selector):
@@ -24,12 +30,16 @@ def parse_details_page(response):
         detail.xpath('.//text()').get().strip(): detail.css('span::text').get().strip()
         for detail in details
     }
-    # print(detail_map)
+
+    check_tags = response.css('li[class*="checktag"]::text').getall()
+
     location = strip_if_exist(response, '#viewad-locality::text')
     location_match = re.search(location_pattern, location)
+
     yield RealEstateItem(
-        id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
+        _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
+        benefits=','.join(check_tags),
         price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
@@ -46,12 +56,14 @@ def parse_details_page(response):
         floors=detail_map.get('Etagen'),
         year_build=detail_map.get('Baujahr'),
         commission=detail_map.get('Provision'),
+        description=converter.handle(strip_if_exist(response, '#viewad-description-text')),
         date_inserted=strip_if_exist(response, '#viewad-extra-info span:nth-child(2)::text'),
         views=strip_if_exist(response, '#viewad-extra-info span:nth-child(1)::text'),
         offerer=strip_if_exist_else(response, '#viewad-contact .text-force-linebreak a::text',
                                     '#viewad-contact .text-force-linebreak::text'),
         offerer_phone_number=strip_if_exist(response, '#viewad-contact-phone a::text'),
-        url=response.url
+        url=response.url,
+        created_datetime=datetime.now()
     )
 
 
