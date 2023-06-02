@@ -6,6 +6,7 @@ from immo_kleinanzeigen.items import RealEstateItem
 from datetime import datetime
 import re
 import html2text
+import logging
 
 location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
 converter = html2text.HTML2Text()
@@ -22,6 +23,9 @@ def strip_if_exist_else(response, selector, selector2):
 
 
 def parse_details_page(response):
+    if response.url.endswith('DELETED_AD'):
+        logging.debug("deleted AD")
+        return
     details = response.css('li[class*="addetailslist--detail"]')
     detail_map = {
         detail.xpath('.//text()').get().strip(): detail.css('span::text').get().strip()
