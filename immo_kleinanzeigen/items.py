@@ -12,6 +12,7 @@ class RealEstateItem:
     caption: str
     benefits: str
     price: float
+    negotiable: bool
     street: str
     location: str
     zip_code: str  # to support 0-leading zip code
