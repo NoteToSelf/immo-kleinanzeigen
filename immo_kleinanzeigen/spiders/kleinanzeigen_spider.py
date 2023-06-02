@@ -31,6 +31,7 @@ def extract_price(price_string):
 
 
 def extract_area(area_string):
+    # area_string e.g. "454 m²"
     return area_string.replace('.', '').replace(',', '.').split('m²')[0].strip()
 
 
