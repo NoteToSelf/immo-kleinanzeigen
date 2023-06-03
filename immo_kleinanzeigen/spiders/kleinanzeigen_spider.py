@@ -47,6 +47,7 @@ def parse_details_page(response):
     location_match = re.search(location_pattern, location)
 
     listing_id = strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text')
+    description = converter.handle(strip_if_exist(response, '#viewad-description-text'))
     yield RealEstateItem(
         _id=listing_id,
         caption=strip_if_exist(response, 'h1::text'),
@@ -54,6 +55,8 @@ def parse_details_page(response):
         price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
+        latitude=strip_if_exist(response, 'meta[property*="latitude"]::attr(content)'),
+        longitude=strip_if_exist(response, 'meta[property*="longitude"]::attr(content)'),
         zip_code=location_match.group("zipcode") if location_match else "",
         state=location_match.group("state") if location_match else "",
         city=location_match.group("city") if location_match else "",
@@ -67,7 +70,7 @@ def parse_details_page(response):
         floors=detail_map.get('Etagen'),
         year_build=detail_map.get('Baujahr'),
         commission=detail_map.get('Provision'),
-        description=converter.handle(strip_if_exist(response, '#viewad-description-text')),
+        description=description,
         date_inserted=strip_if_exist(response, '#viewad-extra-info span:nth-child(2)::text'),
         views=get_views(listing_id),
         offerer=strip_if_exist_else(response, '#viewad-contact .text-force-linebreak a::text',
