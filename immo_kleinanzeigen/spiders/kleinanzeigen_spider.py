@@ -61,12 +61,13 @@ def parse_details_page(response):
     location = strip_if_exist(response, '#viewad-locality::text')
     location_match = re.search(location_pattern, location)
 
+    price = response.css('h2[class*="boxedarticle--price"]::text').get()
     yield RealEstateItem(
         _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
         caption=strip_if_exist(response, 'h1::text'),
         benefits=','.join(check_tags),
         price=extract_price(strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text')),
-        negotiable="VB" in response.css('h2[class*="boxedarticle--price"]::text').get(),
+        negotiable="VB" in price if price is not None else None,
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
         zip_code=location_match.group("zipcode") if location_match else "",
