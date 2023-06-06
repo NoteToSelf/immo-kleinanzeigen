@@ -18,6 +18,8 @@ class RealEstateItem:
     zip_code: str  # to support 0-leading zip code
     state: str
     city: str
+    latitude: float
+    longitude: float
     area_living: float
     area_plot: float
     total_rooms: int

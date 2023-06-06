@@ -6,10 +6,20 @@ from immo_kleinanzeigen.items import RealEstateItem
 from datetime import datetime
 import re
 import html2text
+import requests
+import logging
 
 location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
+views_api_endpoint = "https://www.kleinanzeigen.de/s-vac-inc-get.json?adId="
 converter = html2text.HTML2Text()
 converter.ignore_links = True
+
+
+def get_views(listing_id):
+    headers = {
+        'User-Agent': 'shrug'
+    }
+    return requests.get(f'{views_api_endpoint}{listing_id}', headers=headers).json()['numVisits']
 
 
 def strip_if_exist(response, selector):
@@ -50,6 +60,9 @@ def extract_area(area_string):
 
 
 def parse_details_page(response):
+    if response.url.endswith('DELETED_AD'):
+        logging.debug("deleted AD")
+        return
     details = response.css('li[class*="addetailslist--detail"]')
     detail_map = {
         detail.xpath('.//text()').get().strip(): detail.css('span::text').get().strip()
@@ -62,14 +75,18 @@ def parse_details_page(response):
     location_match = re.search(location_pattern, location)
 
     price = response.css('h2[class*="boxedarticle--price"]::text').get()
+    listing_id = strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text')
+    description = converter.handle(strip_if_exist(response, '#viewad-description-text'))
     yield RealEstateItem(
-        _id=strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text'),
+        _id=listing_id,
         caption=strip_if_exist(response, 'h1::text'),
         benefits=','.join(check_tags),
         price=extract_price(strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text')),
         negotiable="VB" in price if price is not None else None,
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
+        latitude=strip_if_exist(response, 'meta[property*="latitude"]::attr(content)'),
+        longitude=strip_if_exist(response, 'meta[property*="longitude"]::attr(content)'),
         zip_code=location_match.group("zipcode") if location_match else "",
         state=location_match.group("state") if location_match else "",
         city=location_match.group("city") if location_match else "",
@@ -83,9 +100,9 @@ def parse_details_page(response):
         floors=detail_map.get('Etagen'),
         year_build=detail_map.get('Baujahr'),
         commission=detail_map.get('Provision'),
-        description=converter.handle(strip_if_exist(response, '#viewad-description-text')),
+        description=description,
         date_inserted=strip_if_exist(response, '#viewad-extra-info span:nth-child(2)::text'),
-        views=strip_if_exist(response, '#viewad-extra-info span:nth-child(1)::text'),
+        views=get_views(listing_id),
         offerer=strip_if_exist_else(response, '#viewad-contact .text-force-linebreak a::text',
                                     '#viewad-contact .text-force-linebreak::text'),
         offerer_phone_number=strip_if_exist(response, '#viewad-contact-phone a::text'),
