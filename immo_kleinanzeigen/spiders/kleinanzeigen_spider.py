@@ -31,6 +31,34 @@ def strip_if_exist_else(response, selector, selector2):
         response, selector2)
 
 
+def strip_if_exists_and_split(response, selector, split_char):
+    return strip_if_exist(response, selector).split(sep=split_char)[0]
+
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
+
+def extract_price(price_string):
+    # price_string e.g. '555.000€ VB'
+    price = price_string.replace('.', '').replace(',', '.').split('€')[0].strip()
+    if isfloat(price):
+        return price
+    else:
+        return None
+
+
+def extract_area(area_string):
+    if area_string is None:
+        return None
+    # area_string e.g. "454 m²"
+    return area_string.replace('.', '').replace(',', '.').split('m²')[0].strip()
+
+
 def parse_details_page(response):
     if response.url.endswith('DELETED_AD'):
         logging.debug("deleted AD")
@@ -46,13 +74,15 @@ def parse_details_page(response):
     location = strip_if_exist(response, '#viewad-locality::text')
     location_match = re.search(location_pattern, location)
 
+    price = response.css('h2[class*="boxedarticle--price"]::text').get()
     listing_id = strip_if_exist(response, '#viewad-ad-id-box li:nth-child(2)::text')
     description = converter.handle(strip_if_exist(response, '#viewad-description-text'))
     yield RealEstateItem(
         _id=listing_id,
         caption=strip_if_exist(response, 'h1::text'),
         benefits=','.join(check_tags),
-        price=strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text'),
+        price=extract_price(strip_if_exist(response, 'h2[class*="boxedarticle--price"]::text')),
+        negotiable="VB" in price if price is not None else None,
         street=strip_if_exist(response, '#street-address::text'),
         location=location,
         latitude=strip_if_exist(response, 'meta[property*="latitude"]::attr(content)'),
@@ -60,8 +90,8 @@ def parse_details_page(response):
         zip_code=location_match.group("zipcode") if location_match else "",
         state=location_match.group("state") if location_match else "",
         city=location_match.group("city") if location_match else "",
-        area_living=detail_map.get('Wohnfläche'),
-        area_plot=detail_map.get('Grundstücksfläche'),
+        area_living=extract_area(detail_map.get('Wohnfläche')),
+        area_plot=extract_area(detail_map.get('Grundstücksfläche')),
         total_rooms=detail_map.get('Zimmer'),
         bedrooms=detail_map.get('Schlafzimmer'),
         bathrooms=detail_map.get('Badezimmer'),
