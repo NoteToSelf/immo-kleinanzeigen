@@ -61,6 +61,13 @@ def extract_area(area_string):
         return float(area)
 
 
+def get_device_url_startswith(device_urls, prefix):
+    for device_url in device_urls:
+        if device_url.startswith(prefix):
+            return device_url
+    return None
+
+
 def parse_details_page(response):
     if response.url.endswith('DELETED_AD'):
         logging.debug("deleted AD")
@@ -84,6 +91,7 @@ def parse_details_page(response):
     offerer_reliability = strip_if_exist(response, '.userbadges-profile-reliability .text-light::text')
     offerer_type = response.css('span[class*="text-body-regular text-light"]::text').getall()[0].strip()
     offerer_active_since = response.css('span[class*="text-body-regular text-light"]::text').getall()[1].strip().split(' ')[2]
+    device_urls = response.css('link[rel="alternate"]::attr(href)').getall()
     yield RealEstateItem(
         _id=listing_id,
         caption=strip_if_exist(response, 'h1::text'),
@@ -119,8 +127,8 @@ def parse_details_page(response):
         offerer_active_since=offerer_active_since,
         offerer_phone_number=strip_if_exist(response, '#viewad-contact-phone a::text'),
         web_url=response.url,
-        ios_url=response.css('link[rel="alternate"]::attr(href)').getall()[0].strip(),
-        android_url=response.css('link[rel="alternate"]::attr(href)').getall()[1].strip(),
+        ios_url=get_device_url_startswith(device_urls, 'ios-app').strip(),
+        android_url=get_device_url_startswith(device_urls, 'android-app').strip(),
         created_datetime=datetime.now()
     )
 
