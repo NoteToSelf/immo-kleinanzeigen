@@ -44,7 +44,7 @@ def isfloat(num):
 
 
 def extract_price(price_string):
-    # price_string e.g. '555.000€ VB'
+    # price_string e.g. '555.000€ VB '
     price = price_string.replace('.', '').replace(',', '.').split('€')[0].strip()
     if isfloat(price):
         return float(price)
