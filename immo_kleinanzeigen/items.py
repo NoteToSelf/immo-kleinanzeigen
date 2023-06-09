@@ -34,6 +34,13 @@ class RealEstateItem:
     date_inserted: date
     views: int
     offerer: str
+    offerer_rating: str
+    offerer_friendliness: str
+    offerer_reliability: str
+    offerer_type: str
+    offerer_active_since: date
     offerer_phone_number: str
-    url: str
+    web_url: str
+    ios_url: str
+    android_url: str
     created_datetime: datetime
