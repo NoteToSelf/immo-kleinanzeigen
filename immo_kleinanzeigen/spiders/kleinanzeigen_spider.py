@@ -117,7 +117,7 @@ def parse_details_page(response):
         commission=detail_map.get('Provision'),
         description=description,
         date_inserted=strip_if_exist(response, '#viewad-extra-info span:nth-child(2)::text'),
-        views=get_views(listing_id),
+        views=5,
         offerer=strip_if_exist_else(response, '#viewad-contact .text-force-linebreak a::text',
                                     '#viewad-contact .text-force-linebreak::text'),
         offerer_rating=offerer_rating,
@@ -129,7 +129,8 @@ def parse_details_page(response):
         web_url=response.url,
         ios_url=get_device_url_startswith(device_urls, 'ios-app').strip(),
         android_url=get_device_url_startswith(device_urls, 'android-app').strip(),
-        created_datetime=datetime.now()
+        created_datetime=datetime.now(),
+        images=response.css('div[class="galleryimage-element"] img::attr(src)').getall()
     )
 
 
