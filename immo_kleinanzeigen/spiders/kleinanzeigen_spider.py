@@ -152,7 +152,8 @@ def parse_details_page(response):
         web_url=response.url,
         ios_url=get_device_url_startswith(device_urls, 'ios-app').strip(),
         android_url=get_device_url_startswith(device_urls, 'android-app').strip(),
-        created_datetime=datetime.now()
+        created_datetime=datetime.now(),
+        images=response.css('div[class="galleryimage-element"] img::attr(src)').getall()
     )
 
 

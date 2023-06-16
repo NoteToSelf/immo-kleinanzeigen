@@ -44,3 +44,4 @@ class RealEstateItem:
     ios_url: str
     android_url: str
     created_datetime: datetime
+    images: list[str]
