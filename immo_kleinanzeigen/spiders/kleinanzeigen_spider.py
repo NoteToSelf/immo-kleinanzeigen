@@ -1,13 +1,14 @@
 import datetime
-
 import scrapy
-
-from immo_kleinanzeigen.items import RealEstateItem
-from datetime import datetime
 import re
 import html2text
 import requests
 import logging
+
+from immo_kleinanzeigen.items import RealEstateItem
+from datetime import datetime
+from random import randrange
+from time import sleep
 
 location_pattern = r"(?P<zipcode>\d{5}) (?P<state>.*?) - (?P<city>.*)"
 views_api_endpoint = "https://www.kleinanzeigen.de/s-vac-inc-get.json?adId="
@@ -15,11 +16,33 @@ converter = html2text.HTML2Text()
 converter.ignore_links = True
 
 
+def random_line(afile, default=None):
+    line = default
+    for i, aline in enumerate(afile, start=1):
+        if randrange(i) == 0:  # random int [0..i)
+            line = aline
+    return line
+
+
+def get_random_user_agent():
+    with open("user-agents.txt", "r") as f:
+        return random_line(f, 'shrug').strip()
+
+
 def get_views(listing_id):
     headers = {
-        'User-Agent': 'shrug'
+        'User-Agent': get_random_user_agent()
     }
-    return requests.get(f'{views_api_endpoint}{listing_id}', headers=headers).json()['numVisits']
+
+    views_response = requests.get(f'{views_api_endpoint}{listing_id}', headers=headers)
+    while not views_response.ok:
+        if views_response.status_code == 429:
+            retry_after = int(views_response.headers.get('retry-after'))
+            print(f'sleep for { retry_after }sec')
+            sleep(retry_after)
+            views_response = requests.get(f'{ views_api_endpoint }{ listing_id }', headers=headers)
+
+    return views_response.json()['numVisits']
 
 
 def strip_if_exist(response, selector):
@@ -157,7 +180,10 @@ class KleinanzeigenSpider(scrapy.Spider):
             'https://www.kleinanzeigen.de/s-haus-kaufen/thueringen/anzeige:angebote/c208l3548'
         ]
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+            headers = {
+                'User-Agent': get_random_user_agent()
+            }
+            yield scrapy.Request(url=url, callback=self.parse, headers=headers)
 
     def parse(self, response, **kwargs):
         cities = response.xpath('//h2[text()="Ort"]/../..').css('a[class="text-link-subdued"]::attr(href)').getall()
